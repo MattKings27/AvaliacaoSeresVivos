@@ -64,8 +64,8 @@ id SERIAL PRIMARY KEY,
 CREATE TABLE especie_doencas (
 id SERIAL PRIMARY KEY,
  especie_id int REFERENCES especies(id) ON DELETE CASCADE,
-  doenca_id int REFERENCES doencas(id) ON DELETE CASCADE
-	 afeta_humanos BOOLEAN DEFAULT TRUE
+ doenca_id int REFERENCES doencas(id) ON DELETE CASCADE,
+ afeta_humanos BOOLEAN DEFAULT TRUE
 );
 
 CREATE table tipos_interacoes (
