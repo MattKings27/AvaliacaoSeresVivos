@@ -113,4 +113,79 @@ INNER JOIN especie_habitat eh ON h.id = eh.habitat_id
 INNER JOIN especie e ON eh.especie_id = e.id
 GROUP BY h.descricao;
 
+CREATE OR REPLACE VIEW taxa_declinio_populacional AS
+WITH populacao_inicial AS (
+    SELECT 
+        p.especie_id,
+        p.ano,
+        p.populacao_estimada,
+        ROW_NUMBER() OVER (PARTITION BY p.especie_id ORDER BY p.ano ASC) AS rn
+    FROM 
+        populacao_especies p
+),
+populacao_final AS (
+    SELECT 
+        p.especie_id,
+        p.populacao_estimada AS populacao_final
+    FROM 
+        populacao_especies p
+    WHERE 
+        p.ano = (SELECT MAX(ano) FROM populacao_especies WHERE especie_id = p.especie_id)
+)
+SELECT 
+    e.nome_cientifico,
+    e.nome_comum,
+    f.populacao_final,
+    i.populacao_estimada AS populacao_inicial,
+    ((i.populacao_estimada - f.populacao_final) / i.populacao_estimada::FLOAT) * 100 AS taxa_declinio
+FROM 
+    populacao_inicial i
+JOIN 
+    populacao_final f ON i.especie_id = f.especie_id
+JOIN 
+    especies e ON e.id = i.especie_id
+WHERE 
+    i.rn = 1; 
+
+
+
+CREATE OR REPLACE FUNCTION especies_coexistentes_interacoes(nome_cientifico_invasora VARCHAR)
+RETURNS TABLE (
+    nome_cientifico_nativa VARCHAR,
+    nome_comum VARCHAR,
+    descricao TEXT,
+    status_conservacao VARCHAR,
+    comportamento_migratorio VARCHAR,
+    grupo_taxonomico VARCHAR,
+    regiao_endemica VARCHAR,
+    tipo_interacao VARCHAR,
+    descricao_interacao TEXT
+) LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        e.nome_cientifico AS nome_cientifico_nativa,
+        e.nome_comum,
+        e.descricao,
+        e.status_conservacao,
+        e.comportamento_migratorio,
+        e.grupo_taxonomico,
+        e.regiao_endemica,
+        ie.tipo_interacao,
+        ie.descricao AS descricao_interacao
+    FROM 
+        observacoes oi
+    INNER JOIN 
+        observacoes onativas ON oi.localizacao_id = onativas.localizacao_id
+    INNER JOIN 
+        especies e ON onativas.especie_id = e.id
+    LEFT JOIN
+        interacoes_ecologicas ie ON (oi.especie_id = ie.especie_id_1 AND e.id = ie.especie_id_2)
+                               OR (oi.especie_id = ie.especie_id_2 AND e.id = ie.especie_id_1)
+    WHERE 
+        oi.especie_id = (SELECT id FROM especies WHERE nome_cientifico = nome_cientifico_invasora) 
+        AND e.id != oi.especie_id;
+END;
+$$;
+
 
