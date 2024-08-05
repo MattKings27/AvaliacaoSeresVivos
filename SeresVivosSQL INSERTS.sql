@@ -896,3 +896,133 @@ INSERT INTO observacoes (especie_id, localizacao_id, data_hora, observador, nota
 (58, 5, '2024-07-31 12:30:00', 'Konan', 'Visto na caatinga.'),
 (59, 6, '2024-07-31 13:00:00', 'Sasori', 'Observado em zonas rurais.'),
 (60, 7, '2024-07-31 13:30:00', 'Jiraiya', 'Avistado em zonas urbanas.');
+
+
+-- Inserts Caso de Uso 2 --
+
+INSERT INTO classes (nome, filo_id) VALUES ('Actinopterygii', (SELECT id FROM filos WHERE nome = 'Chordata')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO ordens (nome, classe_id) VALUES ('Scorpaeniformes', (SELECT id FROM classes WHERE nome = 'Actinopterygii')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Perciformes', (SELECT id FROM classes WHERE nome = 'Actinopterygii')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Characiformes', (SELECT id FROM classes WHERE nome = 'Actinopterygii')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Scorpaeniformes', (SELECT id FROM classes WHERE nome = 'Actinopterygii')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Perciformes', (SELECT id FROM classes WHERE nome = 'Actinopterygii')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Characiformes', (SELECT id FROM classes WHERE nome = 'Actinopterygii')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO familias (nome, ordem_id) VALUES ('Scorpaenidae', (SELECT id FROM ordens WHERE nome = 'Scorpaeniformes')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO familias (nome, ordem_id) VALUES ('Cichlidae', (SELECT id FROM ordens WHERE nome = 'Perciformes')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO familias (nome, ordem_id) VALUES ('Serrasalmidae', (SELECT id FROM ordens WHERE nome = 'Characiformes')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO generos (nome, familia_id) VALUES ('Pterois', (SELECT id FROM familias WHERE nome = 'Scorpaenidae')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO generos (nome, familia_id) VALUES ('Cichla', (SELECT id FROM familias WHERE nome = 'Cichlidae')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO generos (nome, familia_id) VALUES ('Piaractus', (SELECT id FROM familias WHERE nome = 'Serrasalmidae')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Pterois volitans', 'Peixe-leão', 'Espécie invasora conhecida por sua voracidade e impacto negativo em ecossistemas.', 'Pouco Preocupante', 'Não migratório', 'Peixes ósseos', 'Oceano Indo-Pacífico', (SELECT id FROM generos WHERE nome = 'Pterois'))
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Cichla temensis', 'Tucunaré', 'Peixe de água doce muito popular para pesca esportiva.', 'Não Avaliado', 'Não migratório', 'Peixes ósseos', 'Bacia Amazônica', (SELECT id FROM generos WHERE nome = 'Cichla'))
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Piaractus brachypomus', 'Pirapitinga', 'Peixe de água doce conhecido por sua carne saborosa.', 'Não Avaliado', 'Migratório', 'Peixes ósseos', 'Bacia Amazônica', (SELECT id FROM generos WHERE nome = 'Piaractus'))
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO localizacao (coordenadas, descricao, altitude, regiao, area_protegida, area_desmatada)
+VALUES (
+    'SRID=4326;POLYGON((-60.0 -3.0, -60.0 -2.9, -59.9 -2.9, -59.9 -3.0, -60.0 -3.0))',
+    'Nova população de peixe-leão no Rio Amazonas.',
+    30,
+    'Rio Amazonas',
+    FALSE, 
+    FALSE
+) 
+RETURNING id;
+
+INSERT INTO observacoes (especie_id, localizacao_id, data_hora, observador, notas)
+VALUES (
+    (SELECT id FROM especies WHERE nome_cientifico = 'Pterois volitans'), 
+    (SELECT currval(pg_get_serial_sequence('localizacao', 'id'))), 
+    NOW(), 
+    'Dra. Maria Silva', 
+    'Observação de uma nova população de peixe-leão no Rio Amazonas.'
+);
+
+INSERT INTO interacoes_ecologicas (especie_id_1, especie_id_2, tipo_interacao, descricao)
+VALUES (
+    (SELECT id FROM especies WHERE nome_cientifico = 'Pterois volitans'),
+    (SELECT id FROM especies WHERE nome_cientifico = 'Cichla temensis'),
+    'Predação',
+    'O peixe-leão (Pterois volitans) preda o tucunaré (Cichla temensis) em algumas áreas do Rio Amazonas.'
+);
+
+INSERT INTO observacoes (especie_id, localizacao_id, data_hora, observador, notas)
+VALUES 
+((SELECT id FROM especies WHERE nome_cientifico = 'Cichla temensis'), 1, NOW(), 'Observador 1', 'Observação de tucunaré na mesma localização que o peixe-leão.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Piaractus brachypomus'), 1, NOW(), 'Observador 2', 'Observação de pirapitinga na mesma localização que o peixe-leão.');
+
+
+--Inserts do Caso de Uso 7--
+
+INSERT INTO ordens (nome, classe_id) VALUES ('Carnivora', (SELECT id FROM classes WHERE nome = 'Mammalia')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Perissodactyla', (SELECT id FROM classes WHERE nome = 'Mammalia')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO ordens (nome, classe_id) VALUES ('Primates', (SELECT id FROM classes WHERE nome = 'Mammalia')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO familias (nome, ordem_id) VALUES ('Felidae', (SELECT id FROM ordens WHERE nome = 'Carnivora')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO familias (nome, ordem_id) VALUES ('Tapiridae', (SELECT id FROM ordens WHERE nome = 'Perissodactyla')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO familias (nome, ordem_id) VALUES ('Cebidae', (SELECT id FROM ordens WHERE nome = 'Primates')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO familias (nome, ordem_id) VALUES ('Atelidae', (SELECT id FROM ordens WHERE nome = 'Primates')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO generos (nome, familia_id) VALUES ('Panthera', (SELECT id FROM familias WHERE nome = 'Felidae')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO generos (nome, familia_id) VALUES ('Tapirus', (SELECT id FROM familias WHERE nome = 'Tapiridae')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO generos (nome, familia_id) VALUES ('Cebus', (SELECT id FROM familias WHERE nome = 'Cebidae')) ON CONFLICT (nome) DO NOTHING;
+INSERT INTO generos (nome, familia_id) VALUES ('Brachyteles', (SELECT id FROM familias WHERE nome = 'Atelidae')) ON CONFLICT (nome) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Panthera onca', 'Onça-pintada', 'Grande felino nativo das Américas.', 'Vulnerável', 'Não migratório', 'Mamíferos', 'Florestas tropicais', (SELECT id FROM generos WHERE nome = 'Panthera')) 
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Tapirus terrestris', 'Anta brasileira', 'Maior mamífero terrestre da América do Sul.', 'Vulnerável', 'Migratório', 'Mamíferos', 'Florestas tropicais', (SELECT id FROM generos WHERE nome = 'Tapirus')) 
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Cebus apella', 'Macaco-prego', 'Espécie de macaco do Novo Mundo.', 'Pouco Preocupante', 'Não migratório', 'Mamíferos', 'Florestas tropicais', (SELECT id FROM generos WHERE nome = 'Cebus')) 
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO especies (nome_cientifico, nome_comum, descricao, status_conservacao, comportamento_migratorio, grupo_taxonomico, regiao_endemica, genero_id)
+VALUES 
+('Brachyteles hypoxanthus', 'Muriqui-do-norte', 'Maior primata das Américas.', 'Criticamente em Perigo', 'Não migratório', 'Mamíferos', 'Mata Atlântica', (SELECT id FROM generos WHERE nome = 'Brachyteles')) 
+ON CONFLICT (nome_cientifico) DO NOTHING;
+
+INSERT INTO localizacao (coordenadas, descricao, altitude, regiao, area_protegida, area_desmatada)
+VALUES 
+('SRID=4326;POLYGON((-60.1 -3.1, -60.1 -3.0, -60.0 -3.0, -60.0 -3.1, -60.1 -3.1))', 'Floresta Amazônica', 50, 'Amazonas', TRUE, FALSE),
+('SRID=4326;POLYGON((-45.1 -23.1, -45.1 -23.0, -45.0 -23.0, -45.0 -23.1, -45.1 -23.1))', 'Mata Atlântica', 100, 'São Paulo', TRUE, FALSE),
+('SRID=4326;POLYGON((-54.1 -14.1, -54.1 -14.0, -54.0 -14.0, -54.0 -14.1, -54.1 -14.1))', 'Pantanal', 20, 'Mato Grosso do Sul', FALSE, FALSE),
+('SRID=4326;POLYGON((-40.1 -10.1, -40.1 -10.0, -40.0 -10.0, -40.0 -10.1, -40.1 -10.1))', 'Caatinga', 200, 'Bahia', FALSE, TRUE);
+
+INSERT INTO observacoes (especie_id, localizacao_id, data_hora, observador, notas)
+VALUES 
+((SELECT id FROM especies WHERE nome_cientifico = 'Panthera onca'), (SELECT id FROM localizacao WHERE descricao = 'Floresta Amazônica'), '2022-06-01 10:00:00', 'Biólogo A', 'Observação de onça-pintada na Floresta Amazônica.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Tapirus terrestris'), (SELECT id FROM localizacao WHERE descricao = 'Pantanal'), '2022-06-01 11:00:00', 'Biólogo B', 'Observação de anta brasileira no Pantanal.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Cebus apella'), (SELECT id FROM localizacao WHERE descricao = 'Caatinga'), '2022-06-01 12:00:00', 'Biólogo C', 'Observação de macaco-prego na Caatinga.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Brachyteles hypoxanthus'), (SELECT id FROM localizacao WHERE descricao = 'Mata Atlântica'), '2022-06-01 13:00:00', 'Biólogo D', 'Observação de muriqui-do-norte na Mata Atlântica.');
+
+INSERT INTO populacao_especies (especie_id, ano, populacao_estimada, observacoes)
+VALUES 
+((SELECT id FROM especies WHERE nome_cientifico = 'Panthera onca'), 2013, 15000, 'Estimativa inicial.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Panthera onca'), 2023, 12000, 'Declínio populacional.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Tapirus terrestris'), 2013, 5000, 'Estimativa inicial.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Tapirus terrestris'), 2023, 4500, 'Pequeno declínio populacional.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Cebus apella'), 2013, 30000, 'Estimativa inicial.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Cebus apella'), 2023, 29000, 'População estável.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Brachyteles hypoxanthus'), 2013, 1000, 'Estimativa inicial.'),
+((SELECT id FROM especies WHERE nome_cientifico = 'Brachyteles hypoxanthus'), 2023, 600, 'Declínio significativo.');
