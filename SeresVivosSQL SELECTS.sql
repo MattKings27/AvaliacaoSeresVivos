@@ -77,3 +77,9 @@ INNER JOIN especie e ON o.especie_id = e.id
 WHERE e.nome_cientifico = 'Nome Científico da Espécie'
 AND l.area_protegida = TRUE
 ORDER BY area_tamanho DESC;
+
+
+SELECT * FROM especies_coexistentes_interacoes('Pterois volitans');
+SELECT * FROM taxa_declinio_populacional;
+
+
